@@ -37,37 +37,11 @@ include_once 'Views/Layouts/header.php';
 </style>
 
 <section class="content">
-
-  <!-- Default box -->
   <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">Zonas</h3>
-    </div>
     <div class="card-body">
-      <div id="zonas" class="row">
-        <div class="col-sm-2">
-          <div class="card">
-            <div class="card-body">
-              <div class="row">
-                <div class="col-sm-12">
-                  <img src="Util/Img/zona/zona_default.png" class="img-fluid">
-                </div>
-                <div class="col-sm-12">
-                  <span class="text-muted-float-left">Nombre de la zona</span><br>
-                  <a href="#" class="titulo_producto">Responsable de la zona</a><br>
-                  <span class="badge bg-success">Tipo de zona</span><br>
-                  <span class="">S/ 1000</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
+      <img src="Util/Img/indexRecojo.png" alt="" class="d-block mx-auto" width="900px">
     </div>
   </div>
-  <!-- /.card -->
-
 </section>
 <script src="https://unpkg.com/@popperjs/core@2.10.1/dist/umd/popper.min.js"></script>
 <?php
