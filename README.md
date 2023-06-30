@@ -1,2 +1,2 @@
 # G3-Web-SistemaRecojoBasura
-Subida de proyecto g3 web
+- Sistema web para el recojo de basura en lugares publicos
