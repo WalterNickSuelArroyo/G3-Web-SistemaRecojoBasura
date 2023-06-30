@@ -77,7 +77,6 @@ $(document).ready(function () {
     function llenar_usuarios() {
         funcion = "llenar_usuarios";
         $.post('../Controllers/UsuarioController.php', { funcion }, (response) => {
-            console.log(response);
             let usuarios = JSON.parse(response);
             let template = '';
             usuarios.forEach(usuario => {
@@ -106,7 +105,6 @@ $(document).ready(function () {
     function llenar_zonas() {
         funcion = "llenar_zonas";
         $.post('../Controllers/ZonaController.php', { funcion }, (response) => {
-            //console.log(response);
             let zonas = JSON.parse(response);
             let template = '';
             zonas.forEach(zona => {
@@ -223,6 +221,102 @@ $(document).ready(function () {
             })
         }
     }
+    /*async function crear_actividad(datos) {
+        let data = await fetch('../Controllers/ActividadController.php', {
+            method: 'POST',
+            body: datos
+        })
+        if (data.ok) {
+            let response = await data.text();
+            try {
+                let respuesta = JSON.parse(response);
+                if (respuesta.mensaje == 'listo') {
+                    Swal.fire({
+                        position: 'center',
+                        icon: 'success',
+                        title: 'Se ha creado la actividad',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(function () {
+                        read_all_actividades();
+                        $('#form-actividad').trigger('reset');
+                    })
+                }
+
+            } catch (error) {
+                console.error(error);
+                console.log(response);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo crear la actividad, comuniquese con el area de soporte',
+                })
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo conflicto al editar sus datos, comuniquese con el area de soporte',
+            })
+        }
+    }
+    $.validator.setDefaults({
+        submitHandler: function () {
+            let funcion = "crear_actividad";
+            let datos = new FormData($('#form-actividad')[0]);
+            datos.append("funcion", funcion);
+            crear_actividad(datos);
+        }
+    });
+    $('#form-actividad').validate({
+        rules: {
+            hora_inicio: {
+                required: true,
+            },
+            hora_final: {
+                required: true,
+            },
+            id_usuario: {
+                required: true,
+            },
+            id_zona: {
+                required: true,
+            },
+            id_camion: {
+                required: true,
+            }
+        },
+        messages: {
+            hora_inicio: {
+                required: "Este campo es obligatorio"
+            },
+            hora_final: {
+                required: "Este campo es obligatorio"
+            },
+            id_usuario: {
+                required: "Este campo es obligatorio"
+            },
+            id_zona: {
+                required: "Este campo es obligatorio"
+            },
+            id_camion: {
+                required: "Este campo es obligatorio"
+            }
+        },
+        errorElement: 'span',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback');
+            element.closest('.form-group').append(error);
+        },
+        highlight: function (element, errorClass, validClass) {
+            $(element).addClass('is-invalid');
+            $(element).removeClass('is-valid');
+        },
+        unhighlight: function (element, errorClass, validClass) {
+            $(element).removeClass('is-invalid');
+            $(element).addClass('is-valid');
+        }
+    });*/
     $(document).on('click', '.edit', (e) => {
         $('#form-actividad-mod').trigger('reset');
         let elemento = $(this)[0].activeElement;
@@ -249,7 +343,6 @@ $(document).ready(function () {
             try {
                 let respuesta = JSON.parse(response);
                 if (respuesta.mensaje == 'success') {
-                    console.log("a buena hora");
                     $('#form-actividad-mod').trigger('reset');
                     Swal.fire({
                         position: 'center',
@@ -426,28 +519,42 @@ $(document).ready(function () {
         let id_usuario = $('#id_usuario').val();
         let id_zona = $('#id_zona').val();
         let id_camion = $('#id_camion').val();
-        $.post('../Controllers/ActividadController.php', { hora_inicio, hora_final, id_usuario, id_zona, id_camion, funcion }, (response) => {
-            if (response== 'success') {
-                Swal.fire({
-                    position: 'center',
-                    icon: 'success',
-                    title: 'Se ha creado la actividad',
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(function () {
-                    read_all_actividades();
-                    $('#form-actividad').trigger('reset');
-                })
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Hubo conflicto al crear actividad, comuniquese con el area de soporte',
-                })
-            }
-        })
+        
+        try {
+            $.post('../Controllers/ActividadController.php', { hora_inicio, hora_final, id_usuario, id_zona, id_camion, funcion }, (response) => {
+                if (response == 'success') {
+                    Swal.fire({
+                        position: 'center',
+                        icon: 'success',
+                        title: 'Se ha creado la actividad',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(function () {
+                        read_all_actividades();
+                        $('#form-actividad').trigger('reset');
+                    });
+                } else {
+                    console.log(response);
+                    console.log(id_usuario)
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Hubo conflicto al crear actividad, tarao comuníquese con el área de soporte',
+                    });
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al enviar la solicitud, consulte la consola para obtener más información',
+            });
+        }
+        
         e.preventDefault();
-    })
+    });
+    
 })
 let espanol = {
     "processing": "Procesando...",

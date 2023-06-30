@@ -1,6 +1,117 @@
 $(document).ready(function () {
     bsCustomFileInput.init();
     verificar_sesion();
+    llenar_usuarios();
+    llenar_camiones();
+    llenar_zonas();
+    $('#id_usuario').select2({
+        placeholder: 'Seleccione un trabajador',
+        language: {
+            noResults: function () {
+                return "No hay resultados";
+            },
+            searching: function () {
+                return "Buscando...";
+            }
+        }
+    });
+    $('#id_usuario_mod').select2({
+        placeholder: 'Seleccione un trabajador',
+        language: {
+            noResults: function () {
+                return "No hay resultados";
+            },
+            searching: function () {
+                return "Buscando...";
+            }
+        }
+    });
+    $('#id_camion').select2({
+        placeholder: 'Seleccione un camion',
+        language: {
+            noResults: function () {
+                return "No hay resultados";
+            },
+            searching: function () {
+                return "Buscando...";
+            }
+        }
+    });
+    $('#id_camion_mod').select2({
+        placeholder: 'Seleccione un camion',
+        language: {
+            noResults: function () {
+                return "No hay resultados";
+            },
+            searching: function () {
+                return "Buscando...";
+            }
+        }
+    });
+    $('#id_zona').select2({
+        placeholder: 'Seleccione una zona',
+        language: {
+            noResults: function () {
+                return "No hay resultados";
+            },
+            searching: function () {
+                return "Buscando...";
+            }
+        }
+    });
+    $('#id_zona_mod').select2({
+        placeholder: 'Seleccione una zona',
+        language: {
+            noResults: function () {
+                return "No hay resultados";
+            },
+            searching: function () {
+                return "Buscando...";
+            }
+        }
+    });
+    function llenar_usuarios() {
+        funcion = "llenar_usuarios";
+        $.post('../Controllers/UsuarioController.php', { funcion }, (response) => {
+            let usuarios = JSON.parse(response);
+            let template = '';
+            usuarios.forEach(usuario => {
+                template += `
+                <option value="${usuario.id}">${usuario.nombres} ${usuario.apellidos}</option>
+                `;
+            });
+            $('#id_usuario').html(template);
+            $('#id_usuario').val('');
+        })
+    }
+    function llenar_zonas() {
+        funcion = "llenar_zonas";
+        $.post('../Controllers/ZonaController.php', { funcion }, (response) => {
+            let zonas = JSON.parse(response);
+            let template = '';
+            zonas.forEach(zona => {
+                template += `
+                <option value="${zona.id}">${zona.nombre}</option>
+                `;
+            });
+            $('#id_zona').html(template);
+            $('#id_zona').val('');
+        })
+    }
+    function llenar_camiones() {
+        funcion = "llenar_camiones";
+        $.post('../Controllers/CamionController.php', { funcion }, (response) => {
+            let camiones = JSON.parse(response);
+            let template = '';
+            camiones.forEach(camion => {
+                template += `
+                <option value="${camion.id}">${camion.placa} ${camion.marca}</option>
+                `;
+            });
+            $('#id_camion').html(template);
+            $('#id_camion').val('');
+        })
+    }
     function verificar_sesion() {
         funcion = 'verificar_sesion';
         $.post('../Controllers/UsuarioController.php', { funcion }, (response) => {
@@ -54,6 +165,11 @@ $(document).ready(function () {
                                 return `<a href="../Util/Img/solicitudes/basurarecoger.jpg" target="_blank">Imagen referencial</a>`
                             }
                         },
+                        {
+                            "render": function (data, type, datos, meta) {
+                                return `<button id_usuario="${datos.id_usuario}" id_zona="${datos.id_zona}" motivo="${datos.motivo}"  class="edit btn btn-info" title="Editar actividad" type="button" data-bs-toggle="modal" data-bs-target="#modal_crear_actividad"><i class="fas fa-plus"></i></button>`
+                            }
+                        },
                         { data: "estado" }
                     ],
                     "destroy": true,
@@ -94,7 +210,12 @@ $(document).ready(function () {
                         { data: "motivo" },
                         {
                             "render":function(data,type,datos,meta){
-                                return `<a href="../Util/Img/solicitudes/${datos.archivo}" target="_blank">Imagen referencial</a>`
+                                return `<a href="../Util/Img/solicitudes/${datos.archivo}" target="_blank">Imagen puta referencial</a>`
+                            }
+                        },
+                        {
+                            "render": function (data, type, datos, meta) {
+                                return `<button id_usuario="${datos.id_usuario}" id_zona="${datos.id_zona}" motivo="${datos.motivo}" class="remove btn btn-danger" title="Eliminar actividad" type="button"><i class="fas fa-trash-alt"></i></button>`
                             }
                         },
                         { data: "estado" }
@@ -114,6 +235,64 @@ $(document).ready(function () {
             })
         }
     }
+    $(document).on('click', '.edit', (e) => {
+        $('#form-actividad').trigger('reset');
+        let elemento = $(this)[0].activeElement;
+        let id = $(elemento).attr('id');
+        let hora_inicio = $(elemento).attr('hora_inicio');
+        let hora_final = $(elemento).attr('hora_final');
+        let id_usuario = $(elemento).attr('id_usuario');
+        let id_zona = $(elemento).attr('id_zona');
+        let id_camion = $(elemento).attr('id_camion');
+        $('#hora_inicio').val(hora_inicio);
+        $('#hora_final').val(hora_final);
+        $('#id_usuario').val(id_usuario);
+        $('#id_zona').val(id_zona);
+        $('#id_camion').val(id_camion);
+        $('#id_actividad').val(id);
+    });
+    $('#form-actividad').submit(e => {
+        var funcion = 'crear_actividad';
+        let hora_inicio = $('#hora_inicio').val();
+        let hora_final = $('#hora_final').val();
+        let id_usuario = $('#id_usuario').val();
+        let id_zona = $('#id_zona').val();
+        let id_camion = $('#id_camion').val();
+        
+        try {
+            $.post('../Controllers/ActividadController.php', { hora_inicio, hora_final, id_usuario, id_zona, id_camion, funcion }, (response) => {
+                if (response == 'success') {
+                    Swal.fire({
+                        position: 'center',
+                        icon: 'success',
+                        title: 'Se ha creado la actividad',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(function () {
+                        read_all_actividades();
+                        $('#form-actividad').trigger('reset');
+                    });
+                } else {
+                    console.log(response);
+                    console.log(id_usuario)
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Hubo conflicto al crear actividad, tarao comuníquese con el área de soporte',
+                    });
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al enviar la solicitud, consulte la consola para obtener más información',
+            });
+        }
+        
+        e.preventDefault();
+    });
 })
 let espanol = {
     "processing": "Procesando...",
